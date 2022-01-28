@@ -7,12 +7,12 @@ class primesSH{
 
 
 
-  private static int LIMIT = 100000000;
-  private static int THREADNUM = 8;
-  private static boolean[] l1 = new boolean[LIMIT];
+  private static int LIMIT = 100000000; // set 10^8 as upper limit
+  private static int THREADNUM = 8; // set number of threads
+  private static boolean[] primelist = new boolean[LIMIT];
   private static BlockingQueue<Job> joblist = new ArrayBlockingQueue<Job>(THREADNUM);
 
-  private static class Job
+  private static class Job  // class for making a job for a thread to do
   {
       public int start;
 
@@ -22,7 +22,7 @@ class primesSH{
       }
   }
 
-  private static class ThreadWork implements Runnable
+  private static class ThreadWork implements Runnable //class for the threads themselves
   {
     public void run(){
       try{
@@ -30,11 +30,11 @@ class primesSH{
           {
             Job job = joblist.take();
 
-            if (job.start == -1) {
+            if (job.start == -1) { //that is the signal for the thread to stop
                 return;
             }
             for (int i = job.start + (job.start + 1); i < LIMIT; i += job.start +1) {
-                l1[i] = false;
+                primelist[i] = false; // change all multiples of the prime to false
             }
           }
       }
@@ -46,34 +46,35 @@ class primesSH{
 
   public static void main(String[] args) {
 
-    long startTime = System.nanoTime();
-    for (int i=0; i<LIMIT; i++) {
-    l1[i] = true;
+    long startTime = System.nanoTime(); // start clock
+
+    for (int i=0; i<LIMIT; i++) { // set all numbers to true
+    primelist[i] = true;
     }
 
     int j = 0;
 
-    int uppercap = (int)Math.sqrt(LIMIT);
+    int uppercap = (int)Math.sqrt(LIMIT); // only go up to sqrt of 10^8
 
     for (int i = 0; i < THREADNUM; i++)
     {
-      new Thread(new ThreadWork()).start();
+      new Thread(new ThreadWork()).start(); // create the threads
     }
 
     while(j<uppercap)
     {
       if(j==0)
       {
-        l1[j]=false;
+        primelist[j]=false;
       }
 
-      if(!l1[j])
+      if(!primelist[j])
       {
         j++;
         continue;
       }
 
-      Job job = new Job(j);
+      Job job = new Job(j); // prime is found make a job for the threads
       try{
       joblist.put(job);
       }
@@ -82,26 +83,18 @@ class primesSH{
       j++;
     }
 
-    try{
-    joblist.put(new Job(-1));
-    joblist.put(new Job(-1));
-    joblist.put(new Job(-1));
-    joblist.put(new Job(-1));
-    joblist.put(new Job(-1));
-    joblist.put(new Job(-1));
-    joblist.put(new Job(-1));
-    joblist.put(new Job(-1));
+    try{          // stop all the threads
+      for(int i = 0; i< THREADNUM; i++)
+          joblist.put(new Job(-1));
     }
     catch (InterruptedException e){}
 
-    long endTime   = System.nanoTime();
-    long totalTime = endTime - startTime;
 
     long sum=0;
     int num=0;
-    for(int i = 0; i<LIMIT; i++)
+    for(int i = 0; i<LIMIT; i++)  // go back through and count the primes
     {
-      if(l1[i])
+      if(primelist[i])
       {
         sum += i+1;
         num++;
@@ -109,20 +102,21 @@ class primesSH{
     }
 
     int p = 9;
-    int[] maxprimes = new int[10];
+    int[] maxprimes = new int[10]; // find maximum primes
     int n = LIMIT-1;
     while(p>=0)
     {
-      if(l1[n])
+      if(primelist[n])
       {
         maxprimes[p--] = n + 1;
       }
       n--;
     }
 
+    long endTime   = System.nanoTime(); // stop the clock
+    long totalTime = endTime - startTime;
 
-
-    File file = new File("primes.txt");
+    File file = new File("primes.txt"); // output to text file
     try{
         file.createNewFile();
     }
@@ -138,6 +132,8 @@ class primesSH{
       writer.close();
     }
       catch (IOException e){}
+
+
 
   }
 
