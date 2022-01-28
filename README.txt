@@ -1,10 +1,13 @@
+Samuel Hearn
+
 To run my code simply use the command prompts
 
 javac primesSH.java
 java primesSH
 
 First thing the program does is set up a boolean array that is 10^8 large. Then sets them all to true. 
-Using BlockingQueue in java I implemented 8 threads. I learned what prime sieves are in order to optimize finding the primes. 
+Using BlockingQueue in java I implemented 8 threads. I learned what prime sieves are in order to optimize finding the primes.
+We also only look for primes until the sqrt of 10^8 because after that there will be no composite numbers with multiples that have not been checked already. 
 Upon finding a prime, I would task one of the threads with eliminating all the multiples of that prime from the array, setting them to false.
 Since all you do is find multiples of one number, it actually means that the lower numbers should take more time to eliminate their multiples.
 2 having to go through the program 5*10^7 times. But the difference between threads is almost negligable because it gets smaller each time,
@@ -18,4 +21,3 @@ So the actual process of only prime sieving with threads vs without is probably 
 
 Upon checking this fact, and moving where I end the threads to before I go back through the array and look for the primes(which doesnt involve the threads)
 it came out to 379627600 vs 735661900 nanoseconds. So slightly better results.
-
